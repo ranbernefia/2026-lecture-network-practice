@@ -53,12 +53,25 @@ class YourControl:
       That distinction has a name in the textbook.
     """
 
+    # 목표 윈도우 = 파이프 크기(1패킷/슬롯 × RTT 20슬롯 = 20패킷).
+    # 20개면 링크가 쉬지 않고 꽉 차고, 그보다 많이 보내면 속도는 그대로인데 큐에 줄만 길어진다.
+    TARGET = 20
+
     def __init__(self):
-        self.window = 1
-        raise NotImplementedError("write your congestion control")
+        self.window = 1.0
+        self.cooldown = 0       # 줄인 직후 이만큼의 ACK 동안은 손실이 와도 또 줄이지 않음
 
     def on_ack(self):
-        raise NotImplementedError
+        if self.cooldown > 0:
+            self.cooldown -= 1
+        # 슬로 스타트: ACK 하나마다 +1 (RTT마다 2배). 목표에 닿으면 더 늘리지 않고 유지한다
+        if self.window < self.TARGET:
+            self.window = min(self.window + 1, self.TARGET)
 
     def on_loss(self):
-        raise NotImplementedError
+        # 큐가 넘치면 한 번에 여러 개가 버려져 손실 알림이 연달아 온다. 첫 번째에만 반응한다
+        if self.cooldown > 0:
+            return
+        # 손실 = 큐가 넘쳤다는 신호. 윈도우를 절반으로 줄이고, 다시 슬로 스타트로 목표까지 올라간다
+        self.window = max(self.window / 2, 1)
+        self.cooldown = int(self.window)
