@@ -54,11 +54,28 @@ class YourTable:
     Say which you chose and what it cost you in memory.
     """
 
+    # 방법: 프리픽스 길이별로 묶기.
+    # /24는 /24끼리, /16은 /16끼리 사전(dict)에 넣어 둔다. 사전은 "이 네트워크 있어?"를
+    # 항목 수와 상관없이 한 번에 찾아 준다. 찾을 때는 긴 길이부터 물어보고 처음 맞는 곳에서 멈춘다.
+
     def __init__(self):
-        raise NotImplementedError("write your table")
+        self.by_len = {}        # 프리픽스 길이 -> {네트워크 정수: 다음 홉}
+        self.order = []         # 찾을 순서: [(마스크, 그 길이의 사전), ...] 긴 길이부터
 
     def add(self, network, prefix_len, next_hop):
-        raise NotImplementedError
+        group = self.by_len.setdefault(prefix_len, {})
+        # 같은 길이·같은 네트워크가 또 오면 먼저 넣은 것을 유지한다 (LinearTable과 같은 답)
+        group.setdefault(network, next_hop)
+        # 새 길이가 생길 때만 찾을 순서를 다시 만든다 (길이는 최대 33가지)
+        if len(group) == 1:
+            self.order = [((0xFFFFFFFF << (32 - plen)) & 0xFFFFFFFF, self.by_len[plen])
+                          for plen in sorted(self.by_len, reverse=True)]
 
     def lookup(self, address):
-        raise NotImplementedError
+        # 긴 길이부터: 주소에 그 길이의 마스크를 씌워 사전에 있는지 본다.
+        # 처음 맞는 것이 가장 긴 프리픽스이므로 바로 돌려준다.
+        for mask, group in self.order:
+            hop = group.get(address & mask)
+            if hop is not None:
+                return hop
+        return None
