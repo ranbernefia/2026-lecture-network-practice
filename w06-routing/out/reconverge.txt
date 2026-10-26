@@ -1,0 +1,27 @@
+측정: 2026-10-26, Docker Desktop 4.97.0 + FRR 9.1.0, 라우터 r1 r2 r3 삼각형, 모든 선 비용 10
+OSPF 타이머 (show ip ospf interface): Hello 10s, Dead 40s  (frr.conf 에 따로 적혀 있지 않아 기본값)
+측정 방법: 명령 직후부터 docker exec 로 세 라우터의 표를 계속 조회해 처음 바뀐 시각을 기록
+           (한 번 조회에 약 0.4초가 걸려서 1초보다 짧은 값은 "1초 안"으로 읽는 것이 맞다)
+참고: scenario.sh 주석에는 r1 eth1 이 r1-r2 선이라고 되어 있지만, 실제 주소를 보면 eth1 은 r1-r3 선(172.19.0.0/16),
+      eth0 이 r1-r2 선(172.21.0.0/16)이었다.
+
+[끊기] r1 에서 eth1 (r1-r3 선) down
+  r1 표 바뀜                          0.4s   (r1 은 자기 선이 꺼진 것을 바로 안다)
+  r2 표 바뀜                          0.4s   (r1 이 바로 보낸 새 LSA 를 받음)
+  r3 표 바뀜                          0.4s
+  r3 가 r1 을 이웃 목록에서 지움            35.5s  (r3 쪽 선은 살아 있어서 Hello 가 끊긴 뒤 Dead 40s 를 채워야 알아챔)
+
+[복구] r1 eth1 up
+  r1-r3 이웃 다시 Full                 7.1s
+  r1 표가 끊기 전과 같아짐                7.1s
+
+[비용 변경] r1 eth0 (r1-r2 선) 비용 10 -> 100, 선은 끊지 않음
+  r1 표 바뀜                          0.5s
+  r3 표 바뀜                          0.5s
+  r2 표                              변화 없음 (r2 의 길은 r1 의 eth0 비용을 쓰지 않음)
+
+실행 환경 메모
+- compose.yml 이 가리키는 docker.io/frrouting/frr:v9.1.0 이미지가 Docker Hub 에 없어서, FRR 공식 저장소의
+  quay.io/frrouting/frr:9.1.0 (같은 9.1.0 버전) 을 받아 같은 이름으로 태그해서 썼다. compose.yml 은 고치지 않았다.
+- Windows 에서 저장소를 받으며 topology 설정 파일의 줄 끝이 CRLF 로 바뀌어 ospfd 가 시작하지 못했다
+  ("getaddrinfo failed"). 줄 끝만 LF 로 되돌리니 정상 동작했다(내용은 그대로).

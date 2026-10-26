@@ -1,0 +1,87 @@
+﻿### tracert www.korea.ac.kr  (2026-10-26 22:15, home wired)
+
+Tracing route to www.korea.ac.kr [163.152.6.10]
+over a maximum of 20 hops:
+
+  1    <1 ms    <1 ms    <1 ms  192.168.35.1 
+  2     *        *        *     Request timed out.
+  3     *        *        *     Request timed out.
+  4     *        *        *     Request timed out.
+  5     *        *        *     Request timed out.
+  6     *        *        *     Request timed out.
+  7     *        *        *     Request timed out.
+  8     *        *        *     Request timed out.
+  9     *        *        *     Request timed out.
+ 10     *        *        *     Request timed out.
+ 11     *        *        *     Request timed out.
+ 12     *        *        *     Request timed out.
+ 13     *        *        *     Request timed out.
+ 14     *        *        *     Request timed out.
+ 15     *        *        *     Request timed out.
+ 16     *        *        *     Request timed out.
+ 17     *        *        *     Request timed out.
+ 18     *        *        *     Request timed out.
+ 19     *        *        *     Request timed out.
+ 20     *        *        *     Request timed out.
+
+Trace complete.
+
+### tracert www.stanford.edu
+
+Tracing route to stanford.netlifyglobalcdn.com [15.197.167.90]
+over a maximum of 25 hops:
+
+  1    <1 ms    <1 ms    <1 ms  192.168.35.1 
+  2     *        *        *     Request timed out.
+  3     *        *        *     Request timed out.
+  4     *        *        *     Request timed out.
+  5     *        *        *     Request timed out.
+  6     *        *        *     Request timed out.
+  7     *        *        *     Request timed out.
+  8     *        *        *     Request timed out.
+  9     *        *        *     Request timed out.
+ 10     *        *        *     Request timed out.
+ 11     *        *        *     Request timed out.
+ 12     *        *        *     Request timed out.
+ 13     *        *        *     Request timed out.
+ 14     4 ms     4 ms     4 ms  afa7f374f51cc8991.awsglobalaccelerator.com [15.197.167.90] 
+
+Trace complete.
+
+### tracert 1.1.1.1
+
+Tracing route to one.one.one.one [1.1.1.1]
+over a maximum of 20 hops:
+
+  1    <1 ms    <1 ms    <1 ms  192.168.35.1 
+  2     *        *        *     Request timed out.
+  3     *        *        *     Request timed out.
+  4     *        *        *     Request timed out.
+  5     *        *        *     Request timed out.
+  6     *        *        *     Request timed out.
+  7     *        *        *     Request timed out.
+  8     *        *        *     Request timed out.
+  9     *        *        *     Request timed out.
+ 10     *        *        *     Request timed out.
+ 11     *        *        *     Request timed out.
+ 12     4 ms     5 ms     4 ms  one.one.one.one [1.1.1.1] 
+
+Trace complete.
+
+### tracert ftp.us.debian.org  (stanford.edu 가 국내 CDN 으로 연결돼서, 복제 서버를 쓰지 않는 미국 서버로 추가 측정)
+
+Tracing route to ftp.us.debian.org [64.50.233.100]
+over a maximum of 25 hops:
+
+  1    <1 ms    <1 ms    <1 ms  192.168.35.1 
+  2     *        *        *     Request timed out.
+  3     *        *        *     Request timed out.
+  4     *        *        *     Request timed out.
+  5     *        *        *     Request timed out.
+  6     *        *        *     Request timed out.
+  7     *        *        *     Request timed out.
+  8     *        *        *     Request timed out.
+  9     *        *        *     Request timed out.
+ 10   192 ms   192 ms   191 ms  ftp-nyc.osuosl.org [64.50.233.100] 
+
+Trace complete.

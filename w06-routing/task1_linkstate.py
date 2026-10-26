@@ -14,6 +14,7 @@ in the packet. Build it.
     python3 task1_linkstate.py --verify
 """
 import argparse
+import heapq
 
 # Undirected weighted graph: node -> {neighbour: cost}
 TOPOLOGY = {
@@ -33,7 +34,31 @@ def dijkstra(graph, source):
 
     You write the loop. `heapq` is allowed; `networkx` is not.
     """
-    raise NotImplementedError("implement Dijkstra")
+    return {node: cost for node, (cost, _) in _shortest(graph, source).items()}
+
+
+def _shortest(graph, source):
+    """다익스트라 본체. {노드: (최소 비용, source에서 처음 나가는 이웃)}을 돌려준다.
+
+    힙(heapq)에 (지금까지 비용, 첫 홉, 노드)를 넣고, 비용이 가장 작은 것부터 하나씩 확정한다.
+    처음 꺼낸 순간의 비용이 그 노드까지의 최소 비용이다 (비용이 음수가 아니기 때문).
+
+    동점 처리: 비용이 같으면 튜플의 두 번째 칸(첫 홉 이름)이 작은 것이 먼저 꺼내진다.
+    즉 같은 비용의 길이 여러 개면 "이름이 알파벳순으로 앞선 이웃"으로 나가는 길을 고른다.
+    """
+    done = {}
+    heap = [(0, None, source)]
+    while heap:
+        cost, hop, node = heapq.heappop(heap)
+        if node in done:
+            continue            # 이미 더 싸게(또는 같은 비용에 앞선 이름으로) 확정됨
+        done[node] = (cost, hop)
+        for nbr, w in graph.get(node, {}).items():
+            if nbr not in done:
+                # source를 떠나는 첫 걸음이면 그 이웃이 첫 홉, 아니면 물려받는다
+                heapq.heappush(heap, (cost + w, nbr if node == source else hop, nbr))
+    done.pop(source)            # 자기 자신은 빼고 돌려준다
+    return done
 
 
 def forwarding_table(graph, source):
@@ -48,7 +73,9 @@ def forwarding_table(graph, source):
     works, but think about what a router does when two shortest paths tie, and
     pick a rule. Say which in observation.md.
     """
-    raise NotImplementedError("implement the forwarding table")
+    # 경로 전체를 저장하지 않고, 다익스트라를 돌리면서 "처음 나간 이웃"만 따라 넘겨준다.
+    # 그래서 첫 홉은 항상 source의 직접 이웃이고(R3), source 자신은 들어가지 않는다(R4).
+    return {node: hop for node, (_, hop) in _shortest(graph, source).items()}
 
 
 def link_down(graph, a, b):
