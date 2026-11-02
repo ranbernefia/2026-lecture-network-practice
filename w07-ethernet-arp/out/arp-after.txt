@@ -1,0 +1,5 @@
+﻿
+Interface: 192.168.35.70 --- 0x6
+  Internet Address      Physical Address      Type
+  192.168.35.1          08-5d-dd-11-f2-62     dynamic   
+  224.0.0.2             01-00-5e-00-00-02     static    

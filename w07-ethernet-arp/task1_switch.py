@@ -30,7 +30,9 @@ class Switch:
     AGE_SECONDS = 300
 
     def __init__(self, ports):
-        raise NotImplementedError("write your switch")
+        self.ports = ports
+        self.entries = {}       # mac -> (포트, 마지막으로 그 mac이 보낸 시각)
+        self.now = 0.0          # 지금까지 본 가장 최근 시각
 
     def handle(self, frame, in_port):
         """Learn from the source, then decide where the frame goes.
@@ -46,11 +48,26 @@ class Switch:
         Rule 5 is why a switch works at all before it has learned anything, and
         it is also what Task 3 is about.
         """
-        raise NotImplementedError
+        src, dst, self.now = frame
+        self._forget_old()
+        # 규칙 1: 보낸 쪽은 지금 이 포트 뒤에 있다. 예전 포트가 있었어도 새 증거로 덮어쓴다
+        self.entries[src] = (in_port, self.now)
+
+        others = [p for p in range(self.ports) if p != in_port]
+        if dst == self.BROADCAST or dst not in self.entries:
+            return others       # 규칙 3, 5: 방송이거나 모르는 곳이면 온 포트만 빼고 전부
+        out = self.entries[dst][0]
+        return [] if out == in_port else [out]      # 규칙 2, 4: 온 포트로는 되돌리지 않는다
 
     def table(self):
         """{mac: port} as currently learned. Aged-out entries must be gone."""
-        raise NotImplementedError
+        self._forget_old()
+        return {mac: port for mac, (port, _) in self.entries.items()}
+
+    def _forget_old(self):
+        # AGE_SECONDS보다 오래 소식이 없는 항목은 지운다
+        self.entries = {mac: (port, seen) for mac, (port, seen) in self.entries.items()
+                        if self.now - seen <= self.AGE_SECONDS}
 
 
 # ------------------------------------------------------------------- harness
